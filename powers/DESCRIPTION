@@ -14,6 +14,10 @@ RoxygenNote: 6.1.0
 Suggests: testthat,
     knitr,
     rmarkdown
-Imports: ggplot2
+Imports: 
+    ggplot2,
+    BIGL,
+    car,
+    bimixt
 VignetteBuilder: knitr
 Depends: R(>= 2.10.0)

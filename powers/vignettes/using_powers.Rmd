@@ -1,6 +1,5 @@
----
 title: "Using the `powers` package"
-author: "Vincenzo Coia"
+author: "Jummy David"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,7 +8,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-__Note__: This package isn't actually meant to be "serious". I made it just for teaching purposes.
+__Note__: This package isn't actually meant to be "serious". `Vincenzo` made it from scratch just for teaching purposes.
 
 Want to compute powers without having to use `^` or `**`? Give `sqrt` some friends by loading the `powers` package! 
 
@@ -17,12 +16,15 @@ Want to compute powers without having to use `^` or `**`? Give `sqrt` some frien
 library(powers)
 ```
 
-Want squares, cubes, or reciprocals? Easy.
+## Basic `square`, `cube`, `reciprocal` or `square root` transformations
+
+Want squares, cubes, reciprocal or square root? Easy.
 
 ```{r}
 square(1:10)
 cube(1:10)
 reciprocal(1:10)
+sqroot(1:10)
 ```
 
 `apply`-family friendly, too!
@@ -41,4 +43,109 @@ It even comes with the ability to display its output in plot form!
 reciprocal(1:10, plot_it=TRUE)
 ```
 
-Wow!!!
+```{r}
+sqroot(1:10, plot_it=TRUE)
+```
+
+
+## Beyond the basic transformations:  
+
+### `Box Cox Transform`
+
+Box Cox Transform originates from the old function `box.cox()` which is from the car package ([see here ](https://www.statisticshowto.datasciencecentral.com/box-cox-transformation/) for documentation. It is another type of power transform which depends solely on parameter(s) $\lambda$. 
+
+Box Cox function is defined as
+$$x (\lambda)=\begin{cases}
+               \displaystyle \frac{x^{\lambda}-1}{\lambda}, \quad {\text{if}} \quad \lambda \neq 0, \\ \\
+               \log x, \quad {\text{if}} \quad \lambda = 0,
+            \end{cases}$$
+
+while the value of $\lambda$ default to $\lambda = 0$.
+
+Consider the following examples
+
+```{r}
+Box_cox(x = 4:8, lambda = 0)
+Box_cox(x = 1:5, lambda = 2)
+Box_cox(x = 1:4, lambda = -2)
+```
+
+Please note that this function only allows a single value of vector. It will give an error message whenever the length of $\lambda$ entered is greater than one.
+
+Also note that the function `Box_cox` takes in positive values of $x$ as input. I therefore added a `change_neg_to_pos` which changes all negative values of $x$ to positive by adding the posible minimum constant.
+
+```{r}
+Box_cox(x = -2:2, lambda = 2)
+Box_cox(x = -2:2, lambda = 2, change_neg_to_pos = 7)
+```
+
+Below, I showed that whenever the value of $x$ is negative after adding a `change_neg_to_pos`, then there should be a warning message as regards this, and then the function will automatically generate a positive $x$ by adding the possible minimum constant. Here is an example of it
+
+```{r}
+Box_cox(x = -2:2, lambda = 2, change_neg_to_pos = 1)
+```
+
+Obviously, `change_neg_to_pos` of `1` seems not high enough to make values of $x$ positive, the automatic addition of the possible minimum constant is then applied here. This will then give the same output as when no `change_neg_to_pos` is specified.
+
+```{r}
+Box_cox(x = -2:2, lambda = 2)
+```
+
+We can see that the output from when we have `change_neg_to_pos` is synonymous to when there is no `change_neg_to_pos`.
+
+
+### `Inverse Box Cox Transform`
+
+Inverse Box Cox Transform is also one of the  Box Cox transformation that depends on parameter $\lambda$.
+
+Inverse Box Cox function is defined as
+$$x (\lambda)=\begin{cases}
+               \displaystyle (\lambda x+1)^{1/ \lambda}, \quad {\text{if}} \quad \lambda \neq 0, \\ \\
+              e^ x, \quad {\text{if}} \quad \lambda = 0,
+            \end{cases}$$
+
+This works for just one length of $\lambda$ while the value of $\lambda$ default to $\lambda = 0$. Similarly, the function only work for positive values of $x$, but `change_neg_to_pos` will make every negative values of $x$ positive.
+
+```{r}
+Box_cox_inverse(x = 1:3, lambda = 2)
+Box_cox_inverse(x = -3:3, lambda = 2, change_neg_to_pos = 5)
+```
+
+Then if no `change_neg_to_pos` is not specified, the function will automatically make the negative values of $x$ positive by adding to $x$ the possible minimum constant.
+
+```{r}
+Box_cox_inverse(x = -3:3, lambda = 2)
+```
+
+
+### `Two Parameter Box Cox Transform`
+
+Two Parameter Box Cox Transform is also one of the  Box Cox transformation that depends on two parameters $\lambda_1$ and $\lambda_2$.
+
+Two Parameter Box Cox function is defined as
+$$x (\lambda)=\begin{cases}
+               \displaystyle \frac{((x + \lambda_2)^{\lambda_1}-1)}{\lambda_1}, \quad {\text{if}} \quad \lambda_1 \neq 0, \\ \\
+              \log(x + \lambda_2), \quad {\text{if}} \quad \lambda_1 = 0,
+            \end{cases}$$
+
+This works for just one length of $\lambda_1$ and $\lambda_2$ while the values of both $\lambda_1$ $\&$ $\lambda_2$ default to $0$. As stated for the previous functions.
+
+```{r}
+Box_cox_two_param(x = 1:5, lambda1 = 2, lambda2 = 5)
+```
+
+This function eventually becomes the Box Cox Transform for a single parameter $\lambda$ when $\lambda_2=0$.
+Notice that if lambda2 is $0$, then we get the basic one paramter box-cox transformation. 
+
+```{r}
+#The chunk code here compares and confirms that indeed the functions Box_cox() and Box_cox_two_param() are the same for lambda_2=0 (default value).
+Box_cox(x = 1:5, lambda = 2)
+Box_cox_two_param(x = 1:5, lambda1 = 2)
+```
+
+```{r}
+# Again, the chunk code here shows that this function automatically make $x$ positive with or without specifying a change_neg_to_pos.
+Box_cox_two_param(x = -5:5, lambda1 = -3, lambda2 = 4)
+Box_cox_two_param(x = -5:5, lambda1 = -3, lambda2 = 4, change_neg_to_pos = 6)
+#Obviously, the code works with/without specifying change_neg_to_pos
+```

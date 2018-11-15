@@ -13,6 +13,7 @@
 #'      \item square (for \code{square})
 #'      \item cube (for \code{cube})
 #'      \item reciprocal/inverse (for \code{reciprocal})
+#'      \item sqroot (for \code{sqroot})
 #' }
 #'  of \code{x}.
 #'

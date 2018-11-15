@@ -1,5 +1,7 @@
 ---
-output: github_document
+output:
+    github_document:
+            toc: yes
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -12,38 +14,111 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
+
 # powers
 
-The goal of powers is to ...
+This is an R package originally developed by `Vincenzo Coia`, which gives `sqrt()` friends by providing other power functions. I have included in this package, families of `Box Cox Transformation` for one and two parameter and similarly gave an additional function called `Inverse Box Cox Transform`. These functions give the power transformation of the data values $x$ with respect to parameter(s) $\lambda$.  
 
 ## Installation
 
-You can install the released version of powers from [CRAN](https://CRAN.R-project.org) with:
+You can install my version of the powers package on github from:
 
-``` r
-install.packages("powers")
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("https://github.com/STAT545-UBC-students/hw07-funkedavid82/tree/master/powers")
 ```
 
-## Example
+## Examples of functions in the package
 
-This is a basic example which shows you how to solve a common problem:
+I am showing simple examples here, but my `vignette.Rmd` gave a comprehensive direction of use.
+
+### `square()`
 
 ```{r example}
-## basic example code
+#The chunk code here shows the square of numbers 1 to 5, i.e x^2.
+powers::square(c(1,2,3,4,5))
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+### `cube()`
 
-```{r cars}
-summary(cars)
+Similarly, the chunk code here shows the cube of numbers 1 to 5, i.e $x^3$.
+
+```{r}
+
+powers::cube(c(1,2,3,4,5))
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
+### `reciprocal()`
 
-You can also embed plots, for example:
+Also, the chunk code here shows the reciprocal of numbers 1 to 5, i.e $x^-1$ or $1/x$.
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+```{r}
+powers::reciprocal(c(1,2,3,4,5))
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+### `sqroot()`
+
+Again, the code here shows the square root of some numbers, i.e $\sqrt(x)$.
+
+```{r}
+powers::sqroot(c(2,4,9,16,25))
+```
+
+
+Here, I will also give simple examples of the `Box Cox Transform` calling the power package. I will test the function based on negative, zero and positive parameters and values of $x$. 
+
+### `Box_cox()`
+
+```{r}
+x = 1:5 #positive data values. This could be zero or negative.
+lambda = 2 #the measure of strength of the function. We have set this to give an error message if the length of lambda is greater than 1. This function is basically meant for a single value of lambda.
+powers::Box_cox(x, lambda) #the function Box_cox is called from the powers package
+```
+
+Here, I am giving examples of how the function respond to negative values of $x$ compared with positive values. If there is no `change_neg_to_pos` specified, then the function will automatically add the possible minimum constant to make all values of $x$ positive.
+
+```{r}
+powers::Box_cox(x = -5:5, lambda = 1)
+```
+
+In the code below, specifying a `change_neg_to_pos` gives some flexibility on which number to add to each value of $x$ to make them positive.
+
+```{r}
+powers::Box_cox(x = -5:5, lambda = 1, change_neg_to_pos = 7)
+```
+
+### `Box_cox_inverse()`
+
+Here, I consider the inverse of the previous function called `Inverse Box Cox Transform`. We denote the function by `Box_cox_inverse()`.
+
+```{r}
+powers::Box_cox_inverse(x = 1:5, lambda = 1)
+```
+
+Just like we did for the previous function, we can use the function with/without `change_neg_to_pos`. Here is an example;
+
+```{r}
+powers::Box_cox_inverse(x = -3:3, lambda = 2) #this uses the minimum possible constant for change_neg_to_pos.
+powers::Box_cox_inverse(x = -3:3, lambda = 2, change_neg_to_pos = 4) #it uses the specified change_neg_to_pos.
+```
+
+### `Box_cox_two_param()`
+
+Finally, I consider the boxcox function involving two parameters called `Two Parameter Box Cox Transform`. We denote the function by `Box_cox_two_param()`. This function requires two parameters $\lambda_1$ and $\lambda_2$ to input.
+
+```{r}
+powers::Box_cox_two_param(x = 1:3, lambda1 = 2, lambda2 = 3)
+```
+
+Again, from previous functions and examples, we may or may not specify `change_neg_to_pos`. Here is an example of what I mean;
+
+```{r}
+powers::Box_cox_two_param(x = -1:3, lambda1 = 2, lambda2 = 3) #possible minimum constant added to all negative values of x since no change_neg_to_pos is specified. And this gives a warning message. The minimum possible constant here is 2, therefore, specifying a change_neg_to_pos 2 and not specifying change_neg_to_pos atall should give similar results.
+powers::Box_cox_two_param(x = -1:3, lambda1 = 2, lambda2 = 3, change_neg_to_pos = 2) #change_neg_to_pos of 2 added to all negative values of x.
+```
+
+## For Developers
+
+(Again, I don't actually intend for anyone to develop this silly package, but if I did, here's what I'd write.)
+
+Use the internal `pow` function as the machinery for the front-end functions such as `square`, `cube`, and `reciprocal`.
